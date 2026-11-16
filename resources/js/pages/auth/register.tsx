@@ -15,15 +15,17 @@ interface RegisterForm {
     phone: string;
     password: string;
     password_confirmation: string;
+    order: boolean;
 }
 
-export default function Register() {
+export default function Register({ order = false }: { order?: boolean }) {
     const { data, setData, post, processing, errors, reset } = useForm<RegisterForm>({
         name: '',
         email: '',
         phone: '',
         password: '',
         password_confirmation: '',
+        order,
     });
 
     const submit: FormEventHandler = (e) => {
@@ -94,10 +96,11 @@ export default function Register() {
                             required
                             tabIndex={3}
                             autoComplete="new-password"
+                            minLength={4}
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
                             disabled={processing}
-                            placeholder="Password"
+                            placeholder="At least 4 characters"
                         />
                         <InputError message={errors.password} />
                     </div>
@@ -110,6 +113,7 @@ export default function Register() {
                             required
                             tabIndex={4}
                             autoComplete="new-password"
+                            minLength={4}
                             value={data.password_confirmation}
                             onChange={(e) => setData('password_confirmation', e.target.value)}
                             disabled={processing}

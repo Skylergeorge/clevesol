@@ -5,7 +5,7 @@ import { useStorefrontCart } from '@/lib/storefront-cart';
 import { accentTheme, formatPrice } from '@/lib/catalog';
 import { cn } from '@/lib/utils';
 import { type ProductCard as ProductCardType, type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Check, CheckCircle2, Minus, Plus, ShieldCheck, Star, Truck } from 'lucide-react';
 import { useState } from 'react';
 
@@ -42,8 +42,6 @@ export default function ProductPage() {
 
     return (
         <>
-            <Head title={product.name} />
-
             <div className="mx-auto max-w-7xl px-4 py-8">
                 <nav className="text-xs text-zinc-500 dark:text-zinc-400">
                     <Link href={route('home')} className="hover:text-emerald-600">Home</Link>
@@ -81,7 +79,7 @@ export default function ProductPage() {
                         {product.brand && (
                             <span className={cn('text-sm font-semibold uppercase tracking-wide', theme.text)}>{product.brand}</span>
                         )}
-                        <h1 className="mt-1 text-3xl font-extrabold tracking-tight">{product.name}</h1>
+                        <h1 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">{product.name}</h1>
                         {product.subtitle && <p className="mt-2 text-lg text-zinc-500 dark:text-zinc-400">{product.subtitle}</p>}
 
                         <div className="mt-4 flex items-center gap-4">
@@ -127,28 +125,30 @@ export default function ProductPage() {
                         )}
 
                         {/* qty + actions */}
-                        <div className="mt-6 flex flex-wrap items-center gap-3">
-                            <div className="flex items-center rounded-lg border border-zinc-200 dark:border-zinc-700">
-                                <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="px-3 py-2.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                            <div className="flex w-full items-center justify-center rounded-lg border border-zinc-200 sm:w-auto dark:border-zinc-700">
+                                <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800">
                                     <Minus className="h-4 w-4" />
                                 </button>
                                 <span className="w-12 text-center font-semibold">{qty}</span>
-                                <button onClick={() => setQty((q) => q + 1)} className="px-3 py-2.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                                <button onClick={() => setQty((q) => q + 1)} className="px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800">
                                     <Plus className="h-4 w-4" />
                                 </button>
                             </div>
-                            <button
-                                onClick={addToCart}
-                                className="flex-1 rounded-lg border-2 border-zinc-900 px-6 py-3 text-sm font-bold transition hover:bg-zinc-900 hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-zinc-900"
-                            >
-                                Add to cart
-                            </button>
-                            <button
-                                onClick={buyNow}
-                                className="flex-1 rounded-lg bg-emerald-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
-                            >
-                                Request quote
-                            </button>
+                            <div className="grid w-full grid-cols-2 gap-3 sm:flex sm:min-w-0 sm:flex-1">
+                                <button
+                                    onClick={addToCart}
+                                    className="rounded-lg border-2 border-zinc-900 px-4 py-3 text-sm font-bold transition hover:bg-zinc-900 hover:text-white sm:flex-1 sm:px-6 dark:border-white dark:hover:bg-white dark:hover:text-zinc-900"
+                                >
+                                    Add to cart
+                                </button>
+                                <button
+                                    onClick={buyNow}
+                                    className="rounded-lg bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-700 sm:flex-1 sm:px-6"
+                                >
+                                    Request quote
+                                </button>
+                            </div>
                         </div>
 
                         <div className="mt-5 flex items-center gap-2 rounded-xl bg-zinc-50 p-3 text-sm text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">

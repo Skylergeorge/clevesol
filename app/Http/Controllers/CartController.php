@@ -60,6 +60,20 @@ class CartController extends Controller
         return $this->cartJson();
     }
 
+    public function sync(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'items' => 'required|array|max:50',
+            'items.*.product_id' => 'required|integer|exists:products,id',
+            'items.*.qty' => 'required|integer|min:1|max:999',
+            'items.*.size' => 'nullable|string|max:40',
+        ]);
+
+        $this->cart->replace($data['items']);
+
+        return $this->cartJson();
+    }
+
     private function cartJson(): JsonResponse
     {
         return response()->json(['cart' => $this->cart->detailed()]);
@@ -69,17 +83,22 @@ class CartController extends Controller
     {
         $user = $request->user();
         if (! $user) {
-            return redirect()->guest(route('register'));
+            return redirect()->guest(route('login', ['order' => 1]));
         }
 
         $data = $request->validate([
             'company' => 'nullable|string|max:160',
             'message' => 'nullable|string|max:2000',
+            'payment_method' => 'required|in:pay_now,pay_on_delivery',
         ]);
 
         $detailed = $this->cart->detailed();
         if (empty($detailed['items'])) {
             return back(303)->withErrors(['cart' => 'Your cart is empty.']);
+        }
+
+        if ($data['payment_method'] === 'pay_now') {
+            return app(CheckoutController::class)->payCart($request);
         }
 
         $quote = QuoteRequest::create([
@@ -99,6 +118,8 @@ class CartController extends Controller
             ])->all(),
             'estimated_total' => $detailed['subtotal'],
             'status' => 'ordered',
+            'payment_status' => 'unpaid',
+            'payment_method' => 'pay_on_delivery',
         ]);
 
         $this->cart->clear();
@@ -106,10 +127,18 @@ class CartController extends Controller
         return redirect()->route('quote.thanks', ['reference' => $quote->reference]);
     }
 
-    public function thanks(string $reference): Response
+    public function thanks(Request $request, string $reference): Response
     {
+        $quote = QuoteRequest::query()->where('reference', $reference)->first();
+        $owned = $quote && $request->user() && (int) $quote->user_id === (int) $request->user()->id;
+
         return Inertia::render('storefront/quote-thanks', [
             'reference' => $reference,
+            'paid' => $owned && $quote->payment_status === 'paid',
+            'quoteId' => $owned ? $quote->id : null,
+            'status' => $owned ? $quote->status : 'ordered',
+            'paymentStatus' => $owned ? ($quote->payment_status ?? 'unpaid') : 'unpaid',
+            'paymentMethod' => $owned ? ($quote->payment_method ?? 'pay_on_delivery') : 'pay_on_delivery',
         ]);
     }
 }

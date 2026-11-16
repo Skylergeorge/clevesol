@@ -42,13 +42,13 @@ export default function ProductCard({ product }: { product: ProductCardType }) {
                 <button
                     onClick={addToCart}
                     aria-label="Add to cart"
-                    className="absolute bottom-3 right-3 flex h-10 w-10 translate-y-2 items-center justify-center rounded-full bg-zinc-900 text-white opacity-0 shadow-lg transition-all hover:bg-emerald-600 group-hover:translate-y-0 group-hover:opacity-100 dark:bg-white dark:text-zinc-900 dark:hover:bg-emerald-500 dark:hover:text-white"
+                    className="absolute bottom-2 right-2 flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 text-white opacity-100 shadow-lg transition-all hover:bg-emerald-600 md:bottom-3 md:right-3 md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 dark:bg-white dark:text-zinc-900 dark:hover:bg-emerald-500 dark:hover:text-white"
                 >
                     <Plus className="h-5 w-5" />
                 </button>
             </div>
 
-            <div className="flex flex-1 flex-col p-4">
+            <div className="flex flex-1 flex-col p-3 sm:p-4">
                 {product.category && (
                     <span className={cn('text-[11px] font-semibold uppercase tracking-wide', theme.text)}>
                         {product.category}

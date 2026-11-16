@@ -1,7 +1,8 @@
 import OrderProgressJourney from '@/components/storefront/order-progress-journey';
 import { storefrontLayout } from '@/layouts/storefront-layout';
 import { formatPrice } from '@/lib/catalog';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { type SharedData } from '@/types';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 
 interface QuoteItem {
     name: string;
@@ -14,20 +15,24 @@ interface AccountQuote {
     reference: string;
     status: string;
     estimated_total: number;
+    payment_status: string;
+    payment_method: string;
     created_at: string | null;
     items: QuoteItem[];
 }
 
 export default function Account({ profile, quotes }: { profile: { name: string; email: string; phone: string | null }; quotes: AccountQuote[] }) {
+    const { paymentsEnabled } = usePage<SharedData>().props;
     const form = useForm({
         name: profile.name,
         phone: profile.phone ?? '',
     });
+    const payForm = useForm({});
 
     return (
         <>
             <Head title="Your account" />
-            <div className="mx-auto grid w-full max-w-5xl gap-8 px-4 py-10 lg:grid-cols-[18rem_1fr]">
+            <div className="mx-auto grid w-full max-w-5xl gap-8 px-4 py-6 sm:py-10 lg:grid-cols-[18rem_1fr]">
                 <div className="h-fit rounded-lg border border-zinc-200 bg-white p-5">
                 <form
                     onSubmit={(event) => {
@@ -73,7 +78,7 @@ export default function Account({ profile, quotes }: { profile: { name: string; 
                 </div>
 
                 <section>
-                    <h2 className="text-lg font-semibold text-[#002d5b]">Order progress</h2>
+                    <h2 className="text-lg font-semibold text-[#002d5b]">My orders</h2>
                     {quotes.length === 0 ? (
                         <p className="mt-3 text-sm text-[#3d5a73]">Place an order and its progress will show here.</p>
                     ) : (
@@ -85,7 +90,7 @@ export default function Account({ profile, quotes }: { profile: { name: string; 
                                         <div className="text-sm text-[#3d5a73]">{formatPrice(quote.estimated_total)}</div>
                                     </div>
                                     <div className="mt-1 text-xs text-zinc-500">{quote.created_at}</div>
-                                    <OrderProgressJourney status={quote.status} />
+                                    <OrderProgressJourney status={quote.status} paymentStatus={quote.payment_status} paymentMethod={quote.payment_method} />
                                     <ul className="mt-3 space-y-1 text-sm text-[#002d5b]">
                                         {quote.items.map((item, index) => (
                                             <li key={`${quote.id}-${index}`}>
@@ -94,6 +99,25 @@ export default function Account({ profile, quotes }: { profile: { name: string; 
                                             </li>
                                         ))}
                                     </ul>
+                                    <div className="mt-3 flex flex-wrap items-center gap-3">
+                                        <span className="text-xs font-semibold uppercase tracking-wide text-[#3d5a73]">
+                                            {quote.payment_status === 'paid'
+                                                ? 'Paid'
+                                                : quote.payment_method === 'pay_on_delivery'
+                                                  ? 'Payment after delivery'
+                                                  : 'Awaiting payment'}
+                                        </span>
+                                        {paymentsEnabled && quote.payment_method === 'pay_now' && quote.payment_status !== 'paid' ? (
+                                            <button
+                                                type="button"
+                                                disabled={payForm.processing}
+                                                onClick={() => payForm.post(route('checkout.payOrder', quote.id))}
+                                                className="rounded-lg bg-[#117846] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white disabled:opacity-50"
+                                            >
+                                                {payForm.processing ? 'Opening Stripe…' : 'Pay now'}
+                                            </button>
+                                        ) : null}
+                                    </div>
                                 </article>
                             ))}
                         </div>

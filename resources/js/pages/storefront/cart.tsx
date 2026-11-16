@@ -1,18 +1,18 @@
+import PaymentOptions, { type PaymentMethod } from '@/components/storefront/payment-options';
 import ProductMedia from '@/components/storefront/product-media';
 import { storefrontLayout } from '@/layouts/storefront-layout';
-import { useStorefrontCart } from '@/lib/storefront-cart';
+import { clearStoredCart, useStorefrontCart } from '@/lib/storefront-cart';
 import { formatPrice } from '@/lib/catalog';
 import { type SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 
 export default function CartPage() {
-    const { auth } = usePage<SharedData>().props;
+    const { auth, paymentsEnabled } = usePage<SharedData>().props;
     const { cart, setQty, remove } = useStorefrontCart();
 
-    const { data, setData, post, processing, errors } = useForm({
-        company: '',
-        message: '',
+    const { post, processing, errors, data, setData } = useForm({
+        payment_method: (paymentsEnabled ? 'pay_now' : 'pay_on_delivery') as PaymentMethod,
     });
 
     const updateQty = (productId: number, size: string | null, qty: number) => {
@@ -25,7 +25,18 @@ export default function CartPage() {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('quote.submit'));
+        const payNow = data.payment_method === 'pay_now';
+        if (payNow && !paymentsEnabled) {
+            return;
+        }
+        post(payNow ? route('checkout.pay') : route('quote.submit'), {
+            onStart: () => {
+                if (payNow) {
+                    clearStoredCart();
+                }
+            },
+            onSuccess: () => clearStoredCart(),
+        });
     };
 
     if (cart.items.length === 0) {
@@ -112,32 +123,38 @@ export default function CartPage() {
                         </div>
 
                         <form onSubmit={submit} className="space-y-3 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-                            <h2 className="font-bold text-[#002d5b]">Place order</h2>
+                            <h2 className="font-bold text-[#002d5b]">Checkout</h2>
                             {auth.user ? (
                                 <>
-                                    <p className="text-sm text-[#3d5a73]">Ordering as {auth.user.name}. Progress shows on your account after you place this order.</p>
-                                    <Field label="Company" error={errors.company}>
-                                        <input value={data.company} onChange={(e) => setData('company', e.target.value)} className="clv-input" />
-                                    </Field>
-                                    <Field label="Message" error={errors.message}>
-                                        <textarea value={data.message} onChange={(e) => setData('message', e.target.value)} rows={3} className="clv-input resize-none" placeholder="Delivery timeline, sizes, special requirements…" />
-                                    </Field>
+                                    <PaymentOptions
+                                        value={data.payment_method}
+                                        onChange={(method) => setData('payment_method', method)}
+                                        paymentsEnabled={!!paymentsEnabled}
+                                    />
+                                    {errors.cart && <p className="text-xs text-red-500">{errors.cart}</p>}
+                                    {errors.payment_method && <p className="text-xs text-red-500">{errors.payment_method}</p>}
                                     <button
                                         type="submit"
-                                        disabled={processing}
+                                        disabled={processing || (data.payment_method === 'pay_now' && !paymentsEnabled)}
                                         className="w-full rounded-lg bg-[#117846] py-3 text-sm font-bold text-white transition hover:bg-[#0d6a3d] disabled:opacity-50"
                                     >
-                                        {processing ? 'Sending…' : 'Place order'}
+                                        {processing
+                                            ? data.payment_method === 'pay_now'
+                                                ? 'Opening Stripe…'
+                                                : 'Placing order…'
+                                            : data.payment_method === 'pay_now'
+                                              ? 'Place order and pay'
+                                              : 'Place order'}
                                     </button>
                                 </>
                             ) : (
                                 <div className="space-y-3">
-                                    <p className="text-sm text-[#3d5a73]">Register first, then place the order. You’ll follow its progress from your account.</p>
-                                    <Link href={route('register')} className="flex h-12 w-full items-center justify-center rounded-lg bg-[#117846] text-sm font-bold text-white hover:bg-[#0d6a3d]">
-                                        Create an account
+                                    <p className="text-sm text-[#3d5a73]">Log in, then place the order. Your cart is kept.</p>
+                                    <Link href={route('login', { order: 1 })} className="flex h-12 w-full items-center justify-center rounded-lg bg-[#117846] text-sm font-bold text-white hover:bg-[#0d6a3d]">
+                                        Log in to order
                                     </Link>
-                                    <Link href={route('login')} className="block text-center text-sm text-[#002d5b] underline">
-                                        Already registered? Log in
+                                    <Link href={route('register', { order: 1 })} className="block text-center text-sm text-[#002d5b] underline">
+                                        New here? Create an account
                                     </Link>
                                 </div>
                             )}
@@ -146,19 +163,8 @@ export default function CartPage() {
                 </div>
             </div>
 
-            <style>{`.clv-input{width:100%;border-radius:0.5rem;border:1px solid rgb(228 228 231);padding:0.5rem 0.75rem;font-size:0.875rem;outline:none;background:transparent}.clv-input:focus{border-color:#10b981}.dark .clv-input{border-color:rgb(63 63 70)}`}</style>
         </>
     );
 }
 
 CartPage.layout = storefrontLayout;
-
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
-    return (
-        <label className="block">
-            <span className="mb-1 block text-xs font-semibold text-zinc-600 dark:text-zinc-300">{label}</span>
-            {children}
-            {error && <span className="mt-1 block text-xs text-red-500">{error}</span>}
-        </label>
-    );
-}

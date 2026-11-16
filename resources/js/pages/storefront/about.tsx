@@ -1,6 +1,6 @@
 import { storefrontLayout } from '@/layouts/storefront-layout';
 import { type NavCategory, type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
 const VALUES = [
     { label: 'Mission', detail: 'Safer workplaces' },
@@ -15,8 +15,6 @@ export default function About() {
 
     return (
         <>
-            <Head title="About Us" />
-
             <section className="bg-white">
                 <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 lg:grid-cols-2 lg:gap-16 lg:py-24">
                     <SupplyScene categories={navCategories} />

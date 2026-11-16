@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Services\CartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +22,7 @@ class AuthenticatedSessionController extends Controller
         return Inertia::render('auth/login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => $request->session()->get('status'),
+            'order' => $request->boolean('order'),
         ]);
     }
 
@@ -29,15 +31,14 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        $cart = app(CartService::class)->raw();
+
         $request->authenticate();
 
         $request->session()->regenerate();
+        $request->session()->put('clv_cart', $cart);
 
-        $home = $request->user()?->role === 'admin'
-            ? route('dashboard', absolute: false)
-            : route('account', absolute: false);
-
-        return redirect()->intended($home);
+        return $this->afterAuth($request, $cart, $request->boolean('order'));
     }
 
     /**
@@ -51,5 +52,21 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    /**
+     * @param  array<int, array{product_id:int,qty:int,size:?string}>  $cart
+     */
+    private function afterAuth(Request $request, array $cart, bool $fromOrder = false): RedirectResponse
+    {
+        if ($cart !== [] || $fromOrder) {
+            return redirect()->route('home')->with('open_cart', (string) now()->getTimestampMs());
+        }
+
+        if ($request->user()?->role === 'admin') {
+            return redirect()->intended(route('dashboard', absolute: false));
+        }
+
+        return redirect()->intended(route('account', absolute: false));
     }
 }

@@ -30,6 +30,8 @@ interface Quote {
     message: string | null;
     items: QuoteItem[];
     estimated_total: number;
+    payment_status?: string;
+    payment_method?: string;
     status: string;
     created_at: string;
 }
@@ -72,6 +74,7 @@ export default function Quotes({ quotes, stats }: { quotes: Paginated<Quote>; st
                                 <th className="px-4 py-3">Customer</th>
                                 <th className="px-4 py-3">Items</th>
                                 <th className="px-4 py-3">Est. total</th>
+                                <th className="px-4 py-3">Payment</th>
                                 <th className="px-4 py-3">Status</th>
                             </tr>
                         </thead>
@@ -86,6 +89,15 @@ export default function Quotes({ quotes, stats }: { quotes: Paginated<Quote>; st
                                         </td>
                                         <td className="px-4 py-3">{q.items.length}</td>
                                         <td className="px-4 py-3 font-semibold">{formatPrice(q.estimated_total)}</td>
+                                        <td className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#3d5a73]">
+                                            {q.payment_method === 'pay_on_delivery'
+                                                ? q.payment_status === 'paid'
+                                                    ? 'Paid on delivery'
+                                                    : 'After delivery'
+                                                : q.payment_status === 'paid'
+                                                  ? 'Paid'
+                                                  : 'Awaiting payment'}
+                                        </td>
                                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                                             <select
                                                 value={q.status}
@@ -98,8 +110,8 @@ export default function Quotes({ quotes, stats }: { quotes: Paginated<Quote>; st
                                     </tr>
                                     {open === q.id && (
                                         <tr className="bg-zinc-50 dark:bg-zinc-900/50">
-                                            <td colSpan={5} className="px-4 py-4">
-                                                <OrderProgressJourney status={q.status} compact />
+                                            <td colSpan={6} className="px-4 py-4">
+                                                <OrderProgressJourney status={q.status} paymentStatus={q.payment_status} paymentMethod={q.payment_method} compact />
                                                 <div className="mt-4 grid gap-4 md:grid-cols-2">
                                                     <div>
                                                         <h4 className="mb-2 text-xs font-bold uppercase text-zinc-500">Contact</h4>
@@ -126,7 +138,7 @@ export default function Quotes({ quotes, stats }: { quotes: Paginated<Quote>; st
                             ))}
                             {quotes.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="px-4 py-16 text-center text-zinc-500">
+                                    <td colSpan={6} className="px-4 py-16 text-center text-zinc-500">
                                         <FileText className="mx-auto h-10 w-10 text-zinc-300" />
                                         <p className="mt-3">No quote requests yet.</p>
                                     </td>

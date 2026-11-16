@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\CartService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,9 +18,11 @@ class RegisteredUserController extends Controller
     /**
      * Show the registration page.
      */
-    public function create(): Response
+    public function create(Request $request): Response
     {
-        return Inertia::render('auth/register');
+        return Inertia::render('auth/register', [
+            'order' => $request->boolean('order'),
+        ]);
     }
 
     /**
@@ -34,7 +36,7 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'phone' => 'nullable|string|max:40',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', 'string', 'min:4', 'max:255', 'confirmed'],
         ]);
 
         $user = User::create([
@@ -47,7 +49,16 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        $cart = app(CartService::class)->raw();
+
         Auth::login($user);
+
+        $request->session()->regenerate();
+        $request->session()->put('clv_cart', $cart);
+
+        if ($cart !== [] || $request->boolean('order')) {
+            return redirect()->route('home')->with('open_cart', (string) now()->getTimestampMs());
+        }
 
         return to_route('account');
     }

@@ -13,7 +13,12 @@ declare global {
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
+    title: (title) => {
+        if (!title) {
+            return appName;
+        }
+        return title.includes('|') ? title : `${title} - ${appName}`;
+    },
     resolve: (name) =>
         resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx', { eager: true })),
     setup({ el, App, props }) {

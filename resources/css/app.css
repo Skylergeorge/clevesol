@@ -266,8 +266,8 @@
 .clv-chat-dock {
     position: fixed;
     z-index: 50;
-    right: 1.25rem;
-    bottom: 1.25rem;
+    right: 0.75rem;
+    bottom: calc(0.75rem + env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -277,11 +277,18 @@
     max-height: calc(100dvh - 1.5rem);
 }
 
+@media (min-width: 640px) {
+    .clv-chat-dock {
+        right: 1.25rem;
+        bottom: 1.25rem;
+    }
+}
+
 .clv-chat-panel {
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-height: min(34rem, calc(100dvh - 6.25rem));
+    max-height: min(34rem, calc(100dvh - 5.5rem));
     overflow: hidden;
     background: #fff;
     border: 1px solid rgba(0, 45, 91, 0.12);

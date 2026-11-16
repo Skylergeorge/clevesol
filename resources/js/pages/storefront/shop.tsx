@@ -3,7 +3,7 @@ import { storefrontLayout } from '@/layouts/storefront-layout';
 import { categoryIcon } from '@/lib/catalog';
 import { cn } from '@/lib/utils';
 import { type ProductCard as ProductCardType, type SharedData } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { PackageSearch, SlidersHorizontal } from 'lucide-react';
 
 interface Paginated<T> {
@@ -41,11 +41,49 @@ export default function Shop() {
 
     return (
         <>
-            <Head title={category ? category.name : 'All Products'} />
-
-            <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 lg:flex-row lg:items-start">
+            <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-6 sm:gap-8 sm:py-8 lg:flex-row lg:items-start">
                 <aside className="w-full shrink-0 lg:sticky lg:top-24 lg:w-64">
-                    <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+                    <div className="lg:hidden">
+                        <div className="clv-noscroll -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+                            <Link
+                                href={route('shop')}
+                                className={cn(
+                                    'shrink-0 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap',
+                                    !category ? 'border-[#117846] bg-[#117846] text-white' : 'border-zinc-200 bg-white text-zinc-800',
+                                )}
+                            >
+                                All
+                            </Link>
+                            {categories.map((c) => {
+                                const active = category?.id === c.id;
+                                return (
+                                    <Link
+                                        key={c.id}
+                                        href={route('category', c.slug)}
+                                        className={cn(
+                                            'shrink-0 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap',
+                                            active ? 'border-[#117846] bg-[#117846] text-white' : 'border-zinc-200 bg-white text-zinc-800',
+                                        )}
+                                    >
+                                        {c.name}
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                        {brands.length > 0 && (
+                            <select
+                                value={filters.brand}
+                                onChange={(e) => applyFilter({ brand: e.target.value })}
+                                className="mt-3 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                            >
+                                <option value="">All brands</option>
+                                {brands.map((b) => (
+                                    <option key={b} value={b}>{b}</option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
+                    <div className="hidden rounded-2xl border border-zinc-200 bg-white p-4 lg:block dark:border-zinc-800 dark:bg-zinc-900">
                         <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-zinc-900 dark:text-white">Categories</h2>
                         <div className="space-y-1">
                             {categories.map((c) => {
@@ -68,7 +106,7 @@ export default function Shop() {
                     </div>
 
                     {brands.length > 0 && (
-                        <div className="mt-6">
+                        <div className="mt-6 hidden lg:block">
                             <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-zinc-900 dark:text-white">Brand</h3>
                             <select
                                 value={filters.brand}
@@ -86,15 +124,15 @@ export default function Shop() {
 
                 {/* Products */}
                 <div className="min-w-0 flex-1">
-                    <div className="mb-5 flex items-center justify-between">
-                        <p className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
-                            <SlidersHorizontal className="h-4 w-4" />
-                            {products.total} products{filters.q && ` for "${filters.q}"`}
+                    <div className="mb-5 flex items-center justify-between gap-3">
+                        <p className="flex min-w-0 items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+                            <SlidersHorizontal className="h-4 w-4 shrink-0" />
+                            <span className="truncate">{products.total} products{filters.q && ` for "${filters.q}"`}</span>
                         </p>
                         <select
                             value={filters.sort}
                             onChange={(e) => applyFilter({ sort: e.target.value })}
-                            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                            className="max-w-[55%] shrink-0 rounded-lg border border-zinc-200 bg-white px-2 py-2 text-sm sm:max-w-none sm:px-3 dark:border-zinc-700 dark:bg-zinc-900"
                         >
                             <option value="">Sort: Recommended</option>
                             <option value="price_asc">Price: Low to High</option>
@@ -111,7 +149,7 @@ export default function Shop() {
                             <p className="text-sm text-zinc-500">Try a different category or search term.</p>
                         </div>
                     ) : (
-                        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                        <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
                             {products.data.map((p) => (
                                 <ProductCard key={p.id} product={p} />
                             ))}

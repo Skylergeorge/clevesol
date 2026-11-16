@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\StorefrontChat;
 use App\Services\CartService;
+use App\Services\SeoService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -89,6 +90,9 @@ class HandleInertiaRequests extends Middleware
             'staffChatUnread' => $request->user()?->role === 'admin'
                 ? StorefrontChat::where('staff_unread', true)->count()
                 : 0,
+            'paymentsEnabled' => app(\App\Services\StripeCheckoutService::class)->enabled(),
+            'seo' => app(SeoService::class)->all(),
+            'seoPage' => app(SeoService::class)->forRequest($request),
         ]);
     }
 }

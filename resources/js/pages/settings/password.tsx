@@ -83,7 +83,8 @@ export default function Password() {
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
-                                placeholder="New password"
+                                minLength={4}
+                                placeholder="At least 4 characters"
                             />
 
                             <InputError message={errors.password} />

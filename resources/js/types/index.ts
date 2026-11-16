@@ -69,6 +69,24 @@ export interface SharedData {
     openCart: string | null;
     flash: { message: string | null };
     staffChatUnread: number;
+    paymentsEnabled?: boolean;
+    seo?: {
+        site_title: string;
+        meta_title: string;
+        meta_description: string;
+        meta_keywords: string;
+        og_image: string;
+        robots: string;
+    };
+    seoPage?: {
+        title: string;
+        full_title: string;
+        description: string;
+        keywords: string;
+        image: string;
+        robots: string;
+        canonical: string;
+    };
     [key: string]: unknown;
 }
 

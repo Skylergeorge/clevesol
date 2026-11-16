@@ -14,18 +14,21 @@ interface LoginForm {
     email: string;
     password: string;
     remember: boolean;
+    order: boolean;
 }
 
 interface LoginProps {
     status?: string;
     canResetPassword: boolean;
+    order?: boolean;
 }
 
-export default function Login({ status, canResetPassword }: LoginProps) {
+export default function Login({ status, canResetPassword, order = false }: LoginProps) {
     const { data, setData, post, processing, errors, reset } = useForm<LoginForm>({
         email: '',
         password: '',
         remember: false,
+        order,
     });
 
     const submit: FormEventHandler = (e) => {
@@ -80,7 +83,13 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     </div>
 
                     <div className="flex items-center space-x-3">
-                        <Checkbox id="remember" name="remember" tabIndex={3} />
+                        <Checkbox
+                            id="remember"
+                            name="remember"
+                            tabIndex={3}
+                            checked={data.remember}
+                            onCheckedChange={(value) => setData('remember', value === true)}
+                        />
                         <Label htmlFor="remember">Remember me</Label>
                     </div>
 

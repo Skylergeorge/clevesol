@@ -80,6 +80,32 @@ class CartService
         Session::forget(self::KEY);
     }
 
+    /**
+     * @param  array<int, array{product_id:int,qty:int,size?:?string}>  $items
+     */
+    public function replace(array $items): void
+    {
+        $next = [];
+        foreach ($items as $item) {
+            $productId = (int) $item['product_id'];
+            $qty = min(999, max(1, (int) $item['qty']));
+            $size = $item['size'] ?? null;
+            $found = false;
+            foreach ($next as &$line) {
+                if ($line['product_id'] === $productId && ($line['size'] ?? null) === $size) {
+                    $line['qty'] = min(999, $line['qty'] + $qty);
+                    $found = true;
+                    break;
+                }
+            }
+            unset($line);
+            if (! $found) {
+                $next[] = ['product_id' => $productId, 'qty' => $qty, 'size' => $size];
+            }
+        }
+        Session::put(self::KEY, $next);
+    }
+
     public function count(): int
     {
         return array_sum(array_map(fn ($i) => $i['qty'], $this->raw()));

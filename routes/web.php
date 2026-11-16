@@ -3,11 +3,16 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\CatalogueController;
 use App\Http\Controllers\Admin\ChatController as AdminChatController;
+use App\Http\Controllers\Admin\PaymentSettingsController;
 use App\Http\Controllers\Admin\QuoteController;
+use App\Http\Controllers\Admin\SeoController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StorefrontController;
+use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -16,6 +21,8 @@ use Inertia\Inertia;
 | Public storefront
 |--------------------------------------------------------------------------
 */
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
+Route::get('/sitemap.xml', [SitemapController::class, 'sitemap'])->name('sitemap');
 Route::get('/', [StorefrontController::class, 'home'])->name('home');
 Route::get('/shop', [StorefrontController::class, 'shop'])->name('shop');
 Route::get('/about', [StorefrontController::class, 'about'])->name('about');
@@ -28,8 +35,10 @@ Route::get('/cart', [CartController::class, 'index'])->name('cart');
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::patch('/cart/line', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/line', [CartController::class, 'remove'])->name('cart.remove');
+Route::post('/cart/sync', [CartController::class, 'sync'])->name('cart.sync');
 Route::post('/quote', [CartController::class, 'submitQuote'])->name('quote.submit');
 Route::get('/quote/thanks/{reference}', [CartController::class, 'thanks'])->name('quote.thanks');
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 
 // Visitor live chat (JSON, polled by the floating widget)
 Route::prefix('chat')->name('chat.')->group(function () {
@@ -46,6 +55,10 @@ Route::prefix('chat')->name('chat.')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/account', [AccountController::class, 'show'])->name('account');
     Route::patch('/account', [AccountController::class, 'update'])->name('account.update');
+    Route::post('/checkout', [CheckoutController::class, 'payCart'])->middleware('throttle:8,1')->name('checkout.pay');
+    Route::post('/checkout/orders/{quote}', [CheckoutController::class, 'payOrder'])->middleware('throttle:8,1')->name('checkout.payOrder');
+    Route::get('/checkout/success/{reference}', [CheckoutController::class, 'success'])->name('checkout.success');
+    Route::get('/checkout/cancel/{reference}', [CheckoutController::class, 'cancel'])->name('checkout.cancel');
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
@@ -68,11 +81,20 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::match(['put', 'patch', 'post'], '/products/{product:id}', [CatalogueController::class, 'update'])->name('products.update');
         Route::patch('/products/{product:id}/visibility', [CatalogueController::class, 'visibility'])->name('products.visibility');
         Route::delete('/products/{product:id}', [CatalogueController::class, 'destroy'])->name('products.destroy');
+        Route::get('/categories', [CatalogueController::class, 'categories'])->name('categories');
         Route::post('/categories', [CatalogueController::class, 'storeCategory'])->name('categories.store');
+        Route::patch('/categories/{category:id}', [CatalogueController::class, 'updateCategory'])->name('categories.update');
+        Route::delete('/categories/{category:id}', [CatalogueController::class, 'destroyCategory'])->name('categories.destroy');
 
         // Quote requests
         Route::get('/quotes', [QuoteController::class, 'index'])->name('quotes');
         Route::patch('/quotes/{quote}', [QuoteController::class, 'update'])->name('quotes.update');
+
+        Route::get('/seo', [SeoController::class, 'edit'])->name('seo');
+        Route::put('/seo', [SeoController::class, 'update'])->middleware('throttle:8,1')->name('seo.update');
+        Route::get('/payments', [PaymentSettingsController::class, 'edit'])->name('payments');
+        Route::get('/payments/docs', [PaymentSettingsController::class, 'docs'])->name('payments.docs');
+        Route::put('/payments', [PaymentSettingsController::class, 'update'])->middleware('throttle:8,1')->name('payments.update');
 
         // Chat inbox (page + JSON for polling)
         Route::get('/chats', [AdminChatController::class, 'page'])->name('chats');

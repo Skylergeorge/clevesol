@@ -50,7 +50,10 @@ class CatalogueController extends Controller
 
         return Inertia::render('admin/catalogue', [
             'products' => $products,
-            'categories' => Category::orderBy('sort_order')->get(['id', 'name', 'slug', 'icon', 'accent']),
+            'categories' => Category::query()
+                ->withCount('products')
+                ->orderBy('sort_order')
+                ->get(),
             'filters' => [
                 'q' => $request->get('q', ''),
                 'category' => $request->get('category', ''),
@@ -116,6 +119,16 @@ class CatalogueController extends Controller
         return back(303)->with('flash', 'Catalogue cleared.');
     }
 
+    public function categories(): Response
+    {
+        return Inertia::render('admin/categories', [
+            'categories' => Category::query()
+                ->withCount('products')
+                ->orderBy('sort_order')
+                ->get(),
+        ]);
+    }
+
     public function storeCategory(Request $request): RedirectResponse
     {
         $data = $request->validate([
@@ -127,9 +140,40 @@ class CatalogueController extends Controller
         ]);
         $data['slug'] = $this->uniqueCategorySlug($data['name']);
         $data['sort_order'] = (int) Category::max('sort_order') + 1;
+        $data['is_published'] = true;
         Category::create($data);
 
-        return back(303)->with('flash', 'Category created.');
+        return back(303)->with('flash', 'Category created. It now shows in the shop.');
+    }
+
+    public function updateCategory(Request $request, Category $category): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:120',
+            'tagline' => 'nullable|string|max:200',
+            'is_published' => 'nullable|boolean',
+            'sort_order' => 'nullable|integer|min:0|max:999',
+        ]);
+        if ($data['name'] !== $category->name) {
+            $data['slug'] = $this->uniqueCategorySlug($data['name'], $category->id);
+        }
+        if ($request->has('is_published')) {
+            $data['is_published'] = $request->boolean('is_published');
+        }
+        $category->update($data);
+
+        return back(303)->with('flash', 'Category updated.');
+    }
+
+    public function destroyCategory(Category $category): RedirectResponse
+    {
+        if ($category->products()->exists()) {
+            return back(303)->with('flash', 'Remove or move products in “'.$category->name.'” before deleting it.');
+        }
+
+        $category->delete();
+
+        return back(303)->with('flash', 'Category removed.');
     }
 
     private function validateProduct(Request $request): array
@@ -226,12 +270,12 @@ class CatalogueController extends Controller
         return $slug;
     }
 
-    private function uniqueCategorySlug(string $name): string
+    private function uniqueCategorySlug(string $name, ?int $ignoreId = null): string
     {
-        $base = Str::slug($name);
+        $base = Str::slug($name) ?: 'category';
         $slug = $base;
         $i = 1;
-        while (Category::where('slug', $slug)->exists()) {
+        while (Category::where('slug', $slug)->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))->exists()) {
             $slug = $base.'-'.$i++;
         }
 

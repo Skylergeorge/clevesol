@@ -1,4 +1,5 @@
 import BrandLogo from '@/components/storefront/brand-logo';
+import StorefrontSeo from '@/components/storefront/storefront-seo';
 import CartDrawer from '@/components/storefront/cart-drawer';
 import ChatWidget from '@/components/storefront/chat-widget';
 import { StorefrontCartProvider, useStorefrontCart } from '@/lib/storefront-cart';
@@ -26,6 +27,7 @@ export function storefrontLayout(page: ReactNode) {
 export default function StorefrontLayout({ children }: PropsWithChildren) {
     return (
         <StorefrontCartProvider>
+            <StorefrontSeo />
             <StorefrontFrame>{children}</StorefrontFrame>
         </StorefrontCartProvider>
     );
@@ -51,10 +53,10 @@ function StorefrontFrame({ children }: PropsWithChildren) {
 
     useEffect(() => {
         if (openCart) setCartOpen(true);
-    }, [openCart]);
+    }, [openCart, setCartOpen]);
 
     useEffect(() => {
-        if (page.url.startsWith('/quote/thanks')) setCartOpen(false);
+        if (page.url.startsWith('/quote/thanks') || page.url.startsWith('/checkout/success')) setCartOpen(false);
     }, [page.url]);
 
     const submitSearch = (e: React.FormEvent) => {
@@ -87,13 +89,13 @@ function StorefrontFrame({ children }: PropsWithChildren) {
 
             {/* Main header */}
             <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/90">
-                <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
-                    <button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Menu">
+                <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2 sm:gap-4 sm:px-4 sm:py-3">
+                    <button className="shrink-0 lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Menu">
                         <Menu className="h-6 w-6" />
                     </button>
 
-                    <Link href={route('home')} prefetch="mount" className="shrink-0">
-                        <BrandLogo />
+                    <Link href={route('home')} prefetch="mount" className="min-w-0 flex-1 lg:flex-none">
+                        <BrandLogo className="h-8 max-w-[min(100%,12.5rem)] sm:h-12 sm:max-w-none lg:h-14" />
                     </Link>
 
                     {/* Desktop nav */}
@@ -148,7 +150,7 @@ function StorefrontFrame({ children }: PropsWithChildren) {
                         </div>
                     </form>
 
-                    <div className="ml-auto flex items-center gap-1 md:ml-0">
+                    <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1 md:ml-0">
                         <Link
                             href={accountHref}
                             className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800"
@@ -159,7 +161,7 @@ function StorefrontFrame({ children }: PropsWithChildren) {
                         <button
                             type="button"
                             onClick={() => setCartOpen(true)}
-                            className="relative flex h-10 items-center gap-2 rounded-full bg-zinc-900 px-4 text-sm font-semibold text-white hover:bg-emerald-600 dark:bg-white dark:text-zinc-900 dark:hover:bg-emerald-500 dark:hover:text-white"
+                            className="relative flex h-10 items-center gap-2 rounded-full bg-zinc-900 px-3 text-sm font-semibold text-white hover:bg-emerald-600 sm:px-4 dark:bg-white dark:text-zinc-900 dark:hover:bg-emerald-500 dark:hover:text-white"
                         >
                             <ShoppingCart className="h-5 w-5" />
                             <span className="hidden sm:inline">Cart</span>
@@ -285,7 +287,9 @@ function StorefrontFrame({ children }: PropsWithChildren) {
             )}
 
             <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
-            <ChatWidget />
+            <div className={cartOpen ? 'hidden' : undefined}>
+                <ChatWidget />
+            </div>
         </div>
     );
 }

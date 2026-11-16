@@ -1,7 +1,7 @@
 import ProductCard from '@/components/storefront/product-card';
 import { storefrontLayout } from '@/layouts/storefront-layout';
 import { type ProductCard as ProductCardType, type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { ArrowRight } from 'lucide-react';
 
 interface Category {
@@ -27,8 +27,6 @@ export default function Home() {
 
     return (
         <>
-            <Head title="Industrial Safety Equipment & PPE" />
-
             {/* HERO — Walter-style banner: photo full width, copy on the dark left, crew on the right */}
             <section className="relative isolate min-h-[340px] overflow-hidden bg-[#111] text-white lg:min-h-[420px]">
                 <img
@@ -58,7 +56,7 @@ export default function Home() {
 
             {featured.length > 0 && (
                 <section className="relative z-10 -mt-14 px-4 sm:px-6 lg:px-10 xl:px-14">
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
                         {featured.slice(0, 4).map((product) => (
                             <ProductCard key={product.id} product={product} />
                         ))}
@@ -69,7 +67,7 @@ export default function Home() {
             {newArrivals.length > 0 && (
                 <section className="mx-auto max-w-7xl px-4 py-16">
                     <SectionHeading eyebrow="Fresh stock" title="New arrivals" href={route('shop', { sort: 'newest' })} linkLabel="See more" />
-                    <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
                         {newArrivals.map((p) => (
                             <ProductCard key={p.id} product={p} />
                         ))}

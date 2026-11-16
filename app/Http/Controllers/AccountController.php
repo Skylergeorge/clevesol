@@ -25,6 +25,8 @@ class AccountController extends Controller
                 'reference' => $quote->reference,
                 'status' => $quote->status,
                 'estimated_total' => (float) $quote->estimated_total,
+                'payment_status' => $quote->payment_status ?? 'unpaid',
+                'payment_method' => $quote->payment_method ?? 'pay_on_delivery',
                 'created_at' => $quote->created_at?->toDateString(),
                 'items' => collect($quote->items ?? [])->map(fn ($item) => [
                     'name' => $item['name'] ?? '',

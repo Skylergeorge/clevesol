@@ -1,6 +1,6 @@
 import { storefrontLayout } from '@/layouts/storefront-layout';
 import { type SharedData } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
 
 export default function Contact() {
@@ -8,8 +8,6 @@ export default function Contact() {
 
     return (
         <>
-            <Head title="Contact Us" />
-
             <section className="mx-auto max-w-5xl px-4 py-16">
                 <div className="text-center">
                     <span className="text-sm font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">Get in touch</span>

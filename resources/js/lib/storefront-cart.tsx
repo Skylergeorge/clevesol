@@ -24,6 +24,39 @@ type CartApi = {
 };
 
 const CartContext = createContext<CartApi | null>(null);
+const CART_STORAGE = 'clv_cart_items';
+
+type StoredLine = { product_id: number; qty: number; size: string | null };
+
+function readStoredCart(): StoredLine[] {
+    try {
+        const raw = localStorage.getItem(CART_STORAGE);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw) as StoredLine[];
+        return Array.isArray(parsed) ? parsed.filter((item) => item?.product_id && item.qty > 0) : [];
+    } catch {
+        return [];
+    }
+}
+
+export function clearStoredCart() {
+    try {
+        localStorage.removeItem(CART_STORAGE);
+    } catch {
+        // ignore storage errors
+    }
+}
+
+function writeStoredCart(cart: CartState) {
+    try {
+        localStorage.setItem(
+            CART_STORAGE,
+            JSON.stringify(cart.items.map((item) => ({ product_id: item.product_id, qty: item.qty, size: item.size }))),
+        );
+    } catch {
+        // ignore storage errors
+    }
+}
 
 function csrf(): string {
     const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
@@ -121,6 +154,35 @@ export function StorefrontCartProvider({ children }: { children: ReactNode }) {
             setCart(sharedCart);
         }
     }, [sharedCart]);
+
+    useEffect(() => {
+        writeStoredCart(cart);
+    }, [cart]);
+
+    useEffect(() => {
+        if (sharedCart.count > 0) {
+            return;
+        }
+        const stored = readStoredCart();
+        if (stored.length === 0) {
+            return;
+        }
+        let cancelled = false;
+        send(route('cart.sync'), 'POST', { items: stored })
+            .then((confirmed) => {
+                if (cancelled) return;
+                cartRef.current = confirmed;
+                serverCart.current = confirmed;
+                setCart(confirmed);
+                setOpen(true);
+            })
+            .catch(() => {});
+        return () => {
+            cancelled = true;
+        };
+        // Restore once when the shop chrome mounts, so a login still has the cart.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const commit = (next: CartState, request: () => Promise<CartState>) => {
         const gen = ++generation.current;

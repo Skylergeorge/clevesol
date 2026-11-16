@@ -271,7 +271,7 @@ export default function ChatWidget() {
             <div className={`clv-chat-panel ${open ? '' : 'is-closed'}`}>
                 <div className="flex items-center justify-between gap-3 border-b border-[#002d5b]/10 px-4 py-3">
                     <div className="flex min-w-0 items-center gap-3">
-                        <img src="/images/brand/clevesol-lockup.png" alt="" className="h-11 w-auto max-w-[13.5rem] rounded-md object-contain object-left" />
+                        <img src="/images/brand/clevesol-lockup.png" alt="" className="h-8 w-auto max-w-[9rem] rounded-md object-contain object-left sm:h-11 sm:max-w-[13.5rem]" />
                         <p className="truncate text-xs text-[#3d5a73]">{staffTyping ? 'typing…' : 'Shop chat'}</p>
                     </div>
                     <button

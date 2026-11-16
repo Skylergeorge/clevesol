@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { FileText, LayoutGrid, MessagesSquare, Package, Store, Users } from 'lucide-react';
+import { CreditCard, FileText, LayoutGrid, MessagesSquare, Package, Search, Store, Tags, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -19,9 +19,24 @@ const mainNavItems: NavItem[] = [
         icon: Package,
     },
     {
+        title: 'Categories',
+        url: '/admin/categories',
+        icon: Tags,
+    },
+    {
         title: 'Quote Requests',
         url: '/admin/quotes',
         icon: FileText,
+    },
+    {
+        title: 'Payments',
+        url: '/admin/payments',
+        icon: CreditCard,
+    },
+    {
+        title: 'SEO',
+        url: '/admin/seo',
+        icon: Search,
     },
     {
         title: 'Chats',

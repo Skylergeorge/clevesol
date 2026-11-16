@@ -1,7 +1,7 @@
 import { appLayout } from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowRight, FileText, MessagesSquare, Package } from 'lucide-react';
+import { ArrowRight, CreditCard, FileText, MessagesSquare, Package, Search } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '/dashboard' }];
 
@@ -15,7 +15,7 @@ interface Metrics {
 export default function Dashboard({ metrics }: { metrics: Metrics }) {
     const cards = [
         { label: 'Products', value: metrics.products, href: '/admin/catalogue' },
-        { label: 'Categories', value: metrics.categories, href: '/admin/catalogue' },
+        { label: 'Categories', value: metrics.categories, href: '/admin/categories' },
         { label: 'Orders placed', value: metrics.new_quotes, href: '/admin/quotes' },
         { label: 'Open chats', value: metrics.open_chats, href: '/admin/chats' },
     ];
@@ -47,6 +47,8 @@ export default function Dashboard({ metrics }: { metrics: Metrics }) {
                     <QuickLink href="/admin/catalogue" title="Manage catalogue" desc="Add, edit, and publish products." icon={Package} />
                     <QuickLink href="/admin/quotes" title="Quote requests" desc="Review requests sent from the shop." icon={FileText} />
                     <QuickLink href="/admin/chats" title="Customer chats" desc="Reply to storefront conversations." icon={MessagesSquare} />
+                    <QuickLink href="/admin/payments" title="Stripe payments" desc="Turn on card checkout from the dashboard." icon={CreditCard} />
+                    <QuickLink href="/admin/seo" title="SEO" desc="Titles, descriptions, and search indexing." icon={Search} />
                 </div>
             </div>
         </>
