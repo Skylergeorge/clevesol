@@ -46,6 +46,21 @@ test('admins can save stripe keys from the dashboard', function () {
     expect(app(StripeCheckoutService::class)->webhookConfigured())->toBeTrue();
 });
 
+test('admins can save a restricted stripe secret key', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+
+    $this->actingAs($admin)
+        ->from(route('admin.payments'))
+        ->put(route('admin.payments.update'), [
+            'secret_key' => 'rk_test_restrictedsecretvalue',
+            'currency' => 'usd',
+        ])
+        ->assertRedirect(route('admin.payments'));
+
+    expect(Setting::decrypted('stripe.secret'))->toBe('rk_test_restrictedsecretvalue');
+    expect(app(StripeCheckoutService::class)->enabled())->toBeTrue();
+});
+
 test('invalid stripe keys are rejected', function () {
     $admin = User::factory()->create(['role' => 'admin']);
 

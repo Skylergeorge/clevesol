@@ -22,7 +22,7 @@ class StripeCheckoutService
     {
         $secret = $this->secretKey();
 
-        return $secret !== '' && str_starts_with($secret, 'sk_');
+        return $secret !== '' && (str_starts_with($secret, 'sk_') || str_starts_with($secret, 'rk_'));
     }
 
     public function webhookConfigured(): bool

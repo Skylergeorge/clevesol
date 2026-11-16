@@ -42,7 +42,7 @@ class PaymentSettingsController extends Controller
     {
         $data = $request->validate([
             'publishable_key' => ['nullable', 'string', 'max:255', 'regex:/^pk_(test|live)_/'],
-            'secret_key' => ['nullable', 'string', 'max:255', 'regex:/^sk_(test|live)_/'],
+            'secret_key' => ['nullable', 'string', 'max:255', 'regex:/^(sk|rk)_(test|live)_/'],
             'webhook_secret' => ['nullable', 'string', 'max:255', 'regex:/^whsec_/'],
             'currency' => ['required', 'string', 'size:3', 'regex:/^[a-z]{3}$/'],
         ]);
@@ -63,7 +63,7 @@ class PaymentSettingsController extends Controller
 
         $message = $stripe->enabled()
             ? 'Stripe payment settings saved. Card checkout is on.'
-            : 'Settings saved. Add a secret key starting with sk_ to turn on card checkout.';
+            : 'Settings saved. Add a secret key starting with sk_ or rk_ to turn on card checkout.';
 
         return back(303)->with('flash', $message);
     }

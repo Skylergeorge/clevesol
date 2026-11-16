@@ -95,7 +95,7 @@ export default function Payments({
                                 value={form.data.secret_key}
                                 onChange={(event) => form.setData('secret_key', event.target.value)}
                                 autoComplete="new-password"
-                                placeholder={secretConfigured ? 'Saved — leave blank to keep' : 'sk_test_...'}
+                                placeholder={secretConfigured ? 'Saved — leave blank to keep' : 'sk_test_... or rk_test_...'}
                                 className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 font-mono text-sm dark:border-zinc-700 dark:bg-zinc-950"
                             />
                             {form.errors.secret_key ? <p className="mt-1 text-xs text-red-600">{form.errors.secret_key}</p> : null}
