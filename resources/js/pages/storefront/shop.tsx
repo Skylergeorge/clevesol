@@ -4,7 +4,7 @@ import { categoryIcon } from '@/lib/catalog';
 import { cn } from '@/lib/utils';
 import { type ProductCard as ProductCardType, type SharedData } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
-import { MessageCircle, PackageSearch, SlidersHorizontal } from 'lucide-react';
+import { PackageSearch, SlidersHorizontal } from 'lucide-react';
 
 interface Paginated<T> {
     data: T[];
@@ -33,12 +33,7 @@ interface PageProps {
 }
 
 export default function Shop() {
-    const { category, categories, products, brands, filters, company } = usePage<SharedData & PageProps>().props;
-    const phoneDigits = company.phone.replace(/\D/g, '');
-    const whatsappHref = phoneDigits
-        ? `https://wa.me/${phoneDigits}?text=${encodeURIComponent('Need branded shirts for our company. Sending logo and quantity for a free quote and mockup.')}`
-        : route('contact');
-    const isBranding = category?.slug === 'promotional-branding-apparel';
+    const { category, categories, products, brands, filters } = usePage<SharedData & PageProps>().props;
 
     const baseRoute = category ? route('category', category.slug) : route('shop');
 
@@ -134,39 +129,9 @@ export default function Shop() {
                     {category ? (
                         <div className="mb-6">
                             <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-white">{category.name}</h1>
-                            {category.tagline ? (
-                                <p className="mt-2 text-lg font-medium text-zinc-800 dark:text-zinc-200">{category.tagline}</p>
-                            ) : null}
-                            {isBranding ? (
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    <a
-                                        href="#catalog"
-                                        className="rounded-full bg-[#117846] px-4 py-2 text-sm font-semibold text-white"
-                                    >
-                                        Shop custom apparel now
-                                    </a>
-                                    <a
-                                        href={whatsappHref}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
-                                    >
-                                        <MessageCircle className="h-4 w-4" />
-                                        Free quote on WhatsApp
-                                    </a>
-                                    <Link href={route('contact')} className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-semibold dark:border-zinc-700">
-                                        Contact
-                                    </Link>
-                                </div>
-                            ) : null}
-                            {category.description ? (
-                                <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-                                    {category.description}
-                                </p>
-                            ) : null}
                         </div>
                     ) : null}
-                    <div id="catalog" className="mb-5 flex items-center justify-between gap-3">
+                    <div className="mb-5 flex items-center justify-between gap-3">
                         <p className="flex min-w-0 items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
                             <SlidersHorizontal className="h-4 w-4 shrink-0" />
                             <span className="truncate">{products.total} products{filters.q && ` for "${filters.q}"`}</span>
@@ -199,30 +164,6 @@ export default function Shop() {
                     )}
 
                     {/* pagination */}
-                    {isBranding ? (
-                        <div className="mt-10 rounded-2xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900">
-                            <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-                                Looking for trusted suppliers of branding and promotional items in the USA? Clevesol Northwest is your one-stop
-                                source for custom branded T-shirts, polo shirts, corporate shirts, uniforms, and promotional apparel. We serve
-                                startups, small businesses, and large corporations with embroidery and screen printing. Elevate your brand
-                                identity with corporate apparel that lasts on clients and employees.
-                            </p>
-                            <p className="mt-3 text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                                Need branded shirts for your company? Send your logo and quantity on WhatsApp for a free quote and mockup in
-                                two hours.
-                            </p>
-                            <a
-                                href={whatsappHref}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#117846] px-4 py-2 text-sm font-semibold text-white"
-                            >
-                                <MessageCircle className="h-4 w-4" />
-                                Message {company.phone}
-                            </a>
-                        </div>
-                    ) : null}
-
                     {products.links.length > 3 && (
                         <div className="mt-10 flex flex-wrap justify-center gap-1">
                             {products.links.map((link, i) => (
