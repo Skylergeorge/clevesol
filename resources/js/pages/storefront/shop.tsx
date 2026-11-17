@@ -129,6 +129,9 @@ export default function Shop() {
                     {category ? (
                         <div className="mb-6">
                             <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-white">{category.name}</h1>
+                            {category.tagline ? (
+                                <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{category.tagline}</p>
+                            ) : null}
                         </div>
                     ) : null}
                     <div className="mb-5 flex items-center justify-between gap-3">

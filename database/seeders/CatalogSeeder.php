@@ -12,6 +12,7 @@ class CatalogSeeder extends Seeder
     public function run(): void
     {
         foreach ($this->catalog() as $index => $cat) {
+            $categorySlug = $cat['slug'] ?? Str::slug($cat['name']);
             $attributes = [
                 'name' => $cat['name'],
                 'tagline' => $cat['tagline'],
@@ -23,16 +24,17 @@ class CatalogSeeder extends Seeder
             ];
 
             $category = ! empty($cat['refresh'])
-                ? Category::query()->updateOrCreate(['slug' => Str::slug($cat['name'])], $attributes)
-                : Category::query()->firstOrCreate(['slug' => Str::slug($cat['name'])], $attributes);
+                ? Category::query()->updateOrCreate(['slug' => $categorySlug], $attributes)
+                : Category::query()->firstOrCreate(['slug' => $categorySlug], $attributes);
 
             foreach ($cat['products'] as $pIndex => $p) {
-                $slug = Str::slug($cat['name'].'-'.$p['name']);
+                $slug = Str::slug($categorySlug.'-'.$p['name']);
                 $imageFile = public_path("images/products/{$slug}.jpg");
                 $imagePath = file_exists($imageFile) ? "/images/products/{$slug}.jpg" : null;
 
                 $payload = [
                     'category_id' => $category->id,
+                    'slug' => $slug,
                     'image_path' => $imagePath,
                     'name' => $p['name'],
                     'subtitle' => $p['subtitle'] ?? null,
@@ -53,8 +55,12 @@ class CatalogSeeder extends Seeder
                     'sort_order' => $pIndex,
                 ];
 
+                $lookup = ! empty($cat['refresh']) && ! empty($p['sku'])
+                    ? ['sku' => $p['sku']]
+                    : ['slug' => $slug];
+
                 $product = ! empty($cat['refresh'])
-                    ? Product::query()->updateOrCreate(['slug' => $slug], $payload)
+                    ? Product::query()->updateOrCreate($lookup, $payload)
                     : Product::query()->firstOrCreate(['slug' => $slug], $payload);
 
                 if ($imagePath && $product->image_path !== $imagePath) {
@@ -416,111 +422,117 @@ class CatalogSeeder extends Seeder
                 ],
             ],
             [
-                'name' => 'Health Care',
-                'tagline' => 'Quiet dignity for adult care — briefs, pads, wipes, and skin barrier.',
-                'description' => "Clevesol Northwest stocks adult care the way we stock PPE: for facilities, home caregivers, and bulk buyers who need the product to work at 3 a.m., not just look fine on a spec sheet.\n\nTab briefs and pull-ons for day and night. Bariatric and high-absorbency options when standard sizes fail. Underpads that keep a bed, chair, or stretcher honest. Slim liners for lighter days. Wipes and barrier cream so skin stays ahead of moisture.\n\nShipped from Everett for clinics, group homes, and households across the USA. Ask for case pricing — we kit mixed carts so you are not stuck with one SKU when the floor needs three.",
+                'name' => 'Incontinence Care',
+                'slug' => 'health-care',
+                'refresh' => true,
+                'tagline' => 'Adult diapers, pull-ups, bed pads, liners, wipes, and barrier cream.',
+                'description' => null,
                 'icon' => 'HeartPulse',
                 'accent' => 'teal',
                 'products' => [
                     [
-                        'name' => 'Tidehold Tab Briefs',
-                        'subtitle' => 'Adult tab-style incontinence briefs for day and overnight',
+                        'name' => 'Adult Tab Briefs',
+                        'subtitle' => 'Tab-style adult diapers · overnight · 18-count',
                         'sku' => 'CLV-HC-TAB01',
                         'brand' => 'Clevesol Care',
                         'price' => 28.50,
-                        'badge' => 'Best Seller',
+                        'badge' => 'Overnight',
                         'featured' => true,
                         'rating' => 4.8,
                         'reviews' => 186,
                         'stock' => 340,
                         'sizes' => ['M', 'L', 'XL', '2XL'],
-                        'certifications' => ['Latex-free', 'Facility-ready'],
-                        'description' => 'Refastenable tabs, a wide landing zone, and a core that holds overnight without turning the brief into cardboard. Packed for homes and floor carts.',
-                        'features' => ['Refastenable side tabs', 'Wetness indicator', 'Odor-lock core', 'Case and bag packing'],
+                        'certifications' => ['Latex-free'],
+                        'description' => 'Adult incontinence briefs with refastenable tabs. Overnight absorbency for home and facility care.',
+                        'features' => ['Refastenable tabs', 'Overnight core', 'Wetness indicator', '18-count bag'],
                     ],
                     [
-                        'name' => 'Shoreline Pull-On Underwear',
-                        'subtitle' => 'Protective underwear that dresses like everyday briefs',
+                        'name' => 'Adult Pull-Ups',
+                        'subtitle' => 'Underwear-style pull-ons · daytime · 20-count',
                         'sku' => 'CLV-HC-PUL01',
                         'brand' => 'Clevesol Care',
                         'price' => 26.00,
+                        'badge' => 'Pull-On',
                         'featured' => true,
                         'rating' => 4.7,
                         'reviews' => 154,
                         'stock' => 310,
                         'sizes' => ['S', 'M', 'L', 'XL', '2XL'],
-                        'certifications' => ['Latex-free', 'Cloth-like cover'],
-                        'description' => 'Pull-up protection for people who still want to dress themselves. Soft cover, tear-away sides for caregivers, and a discreet silhouette under pants.',
-                        'features' => ['Underwear-style waistband', 'Tear-away sides', 'Quiet cloth-like cover', 'Daytime absorbency'],
+                        'certifications' => ['Latex-free'],
+                        'description' => 'Adult pull-up protective underwear. Elastic waist, tear-away sides for caregivers.',
+                        'features' => ['Underwear waistband', 'Tear-away sides', 'Daytime absorbency', '20-count bag'],
                     ],
                     [
-                        'name' => 'Harborwide Bariatric Brief',
-                        'subtitle' => 'High-absorbency brief for plus sizes and heavy overnight use',
+                        'name' => 'Bariatric Tab Briefs',
+                        'subtitle' => 'Plus-size adult diapers · heavy overnight · 2XL–5XL',
                         'sku' => 'CLV-HC-BAR01',
                         'brand' => 'Clevesol Care',
                         'price' => 42.00,
+                        'badge' => 'Plus Size',
                         'featured' => true,
                         'rating' => 4.9,
                         'reviews' => 97,
                         'stock' => 140,
                         'sizes' => ['2XL', '3XL', '4XL', '5XL'],
-                        'certifications' => ['Latex-free', 'High-capacity core'],
-                        'description' => 'Cut for real bodies, not stretched mediums. Extra-wide tabs, a tall rise, and a core rated for heavy overnight and bariatric care.',
-                        'features' => ['Extended size range', 'High-absorbency core', 'Wide landing zone', 'Standing and recumbent fit'],
+                        'certifications' => ['Latex-free'],
+                        'description' => 'High-absorbency bariatric adult briefs. Extra-wide tabs and a tall rise for plus sizes.',
+                        'features' => ['2XL–5XL', 'Heavy overnight core', 'Wide landing zone'],
                     ],
                     [
-                        'name' => 'Nightguard Underpads',
-                        'subtitle' => 'Disposable underpads and bed protection pads',
+                        'name' => 'Disposable Bed Pads',
+                        'subtitle' => 'Underpads · 30×36 · waterproof backing',
                         'sku' => 'CLV-HC-PAD01',
                         'brand' => 'Clevesol Care',
                         'price' => 19.00,
-                        'badge' => 'Best Seller',
+                        'badge' => 'Bed Pads',
                         'rating' => 4.8,
                         'reviews' => 221,
                         'stock' => 400,
-                        'certifications' => ['Waterproof backing', 'Latex-free'],
-                        'description' => 'Quilted underpads that stay put on a bed, chair, or stretcher. Moisture-proof backing, sealed edges, and a surface that does not wad into a rope by morning.',
-                        'features' => ['Waterproof backing', 'Quilted stay-put surface', 'Bed, chair, and stretcher sizes', 'Bulk case packs'],
+                        'certifications' => ['Waterproof backing'],
+                        'description' => 'Disposable underpads for beds, chairs, and stretchers. Quilted top, waterproof back.',
+                        'features' => ['30×36 underpads', 'Waterproof backing', 'Case packs'],
                     ],
                     [
-                        'name' => 'Quietline Bladder Pads',
-                        'subtitle' => 'Bladder control pads and liners for lighter days',
+                        'name' => 'Bladder Control Pads',
+                        'subtitle' => 'Liners for regular underwear · light to moderate',
                         'sku' => 'CLV-HC-LIN01',
                         'brand' => 'Clevesol Care',
                         'price' => 12.50,
+                        'badge' => 'Liners',
                         'rating' => 4.6,
                         'reviews' => 168,
                         'stock' => 450,
                         'certifications' => ['Latex-free'],
-                        'description' => 'Slim liners that sit in regular underwear. Light to moderate protection without the bulk of a full brief — for workdays, travel, and early-stage care.',
-                        'features' => ['Adhesive strip', 'Contoured core', 'Light and moderate absorbency', 'Discreet pack'],
+                        'description' => 'Slim bladder control pads that stick into regular underwear. Light to moderate absorbency.',
+                        'features' => ['Adhesive strip', 'Light–moderate', 'Discreet pack'],
                     ],
                     [
-                        'name' => 'Cedarwash Cleansing Wipes',
-                        'subtitle' => 'Adult cleansing wipes and personal-care cloths',
+                        'name' => 'Adult Care Wipes',
+                        'subtitle' => 'Rinse-free peri-care wipes · 48-count',
                         'sku' => 'CLV-HC-WIP01',
                         'brand' => 'Clevesol Care',
                         'price' => 9.80,
+                        'badge' => 'Peri Care',
                         'rating' => 4.7,
                         'reviews' => 132,
                         'stock' => 520,
-                        'certifications' => ['pH-balanced', 'Alcohol-free'],
-                        'description' => 'Thick, rinse-free wipes for peri care and bedside cleanup. Soft enough for daily use, strong enough that one cloth actually finishes the job.',
-                        'features' => ['Alcohol-free formula', 'Resealable pack', 'Rinse-free', 'Facility and home sizes'],
+                        'certifications' => ['Alcohol-free'],
+                        'description' => 'Thick rinse-free adult wipes for incontinence cleanup and peri care.',
+                        'features' => ['Rinse-free', 'Alcohol-free', 'Flip-lid pack'],
                     ],
                     [
-                        'name' => 'Dewshield Barrier Cream',
-                        'subtitle' => 'Skin barrier and moisture protection for intact and at-risk skin',
+                        'name' => 'Skin Barrier Cream',
+                        'subtitle' => 'Zinc moisture barrier for incontinence care',
                         'sku' => 'CLV-HC-BRR01',
                         'brand' => 'Clevesol Care',
                         'price' => 14.25,
-                        'badge' => 'New',
+                        'badge' => 'Skin Protect',
                         'rating' => 4.8,
                         'reviews' => 88,
                         'stock' => 260,
-                        'certifications' => ['Dye-free', 'Fragrance-light'],
-                        'description' => 'A zinc-rich barrier that sits between moisture and skin. Spreads thin, stays put under briefs, and does not fight the next wipe-down.',
-                        'features' => ['Moisture barrier film', 'Tube and pump formats', 'Caregiver-friendly spread', 'Pairs with Tidehold and Shoreline'],
+                        'certifications' => ['Dye-free'],
+                        'description' => 'Zinc barrier cream to sit between moisture and skin under briefs and pull-ups.',
+                        'features' => ['Zinc barrier', 'Tube and pump', 'Incontinence skincare'],
                     ],
                 ],
             ],
