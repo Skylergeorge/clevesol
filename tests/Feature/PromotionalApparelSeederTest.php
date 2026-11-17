@@ -11,7 +11,8 @@ test('catalog seeder refreshes branding and incontinence care', function () {
     $care = Category::query()->where('slug', 'health-care')->first();
 
     expect($branding)->not->toBeNull()
-        ->and($branding->products()->count())->toBe(14)
+        ->and($branding->tagline)->toBe('Custom apparel and promo kits — your logo here.')
+        ->and($branding->products()->count())->toBe(17)
         ->and($care)->not->toBeNull()
         ->and($care->name)->toBe('Incontinence Care')
         ->and($care->products()->count())->toBe(7)
@@ -26,6 +27,6 @@ test('catalog seeder refreshes branding and incontinence care', function () {
     expect(Category::query()->where('slug', 'health-care')->count())->toBe(1)
         ->and($care->fresh()->name)->toBe('Incontinence Care')
         ->and(Product::query()->where('sku', 'CLV-HC-TAB01')->value('price'))->toEqual(28.50)
-        ->and($branding->fresh()->products()->count())->toBe(14)
+        ->and($branding->fresh()->products()->count())->toBe(17)
         ->and($care->fresh()->products()->count())->toBe(7);
 });
