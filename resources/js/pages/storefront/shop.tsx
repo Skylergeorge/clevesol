@@ -124,6 +124,17 @@ export default function Shop() {
 
                 {/* Products */}
                 <div className="min-w-0 flex-1">
+                    {category ? (
+                        <div className="mb-6">
+                            <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-white">{category.name}</h1>
+                            {category.tagline ? <p className="mt-2 text-base text-zinc-700 dark:text-zinc-300">{category.tagline}</p> : null}
+                            {category.description ? (
+                                <p className="mt-3 max-w-3xl whitespace-pre-line text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+                                    {category.description}
+                                </p>
+                            ) : null}
+                        </div>
+                    ) : null}
                     <div className="mb-5 flex items-center justify-between gap-3">
                         <p className="flex min-w-0 items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
                             <SlidersHorizontal className="h-4 w-4 shrink-0" />

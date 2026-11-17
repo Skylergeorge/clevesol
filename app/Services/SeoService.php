@@ -57,7 +57,8 @@ class SeoService
             $category = $request->route('category');
             if ($category instanceof Category) {
                 $title = $category->name;
-                $description = $category->tagline ?: $description;
+                $copy = trim(strip_tags((string) ($category->description ?: $category->tagline ?: $description)));
+                $description = Str::limit($copy, 320, '');
             }
         } elseif ($request->routeIs('shop')) {
             $title = 'All Products';

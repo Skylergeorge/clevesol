@@ -4,8 +4,10 @@ import {
     Glasses,
     Hand,
     HardHat,
+    HeartPulse,
     ShieldCheck,
     Shirt,
+    Sparkles,
     Wind,
     type LucideIcon,
 } from 'lucide-react';
@@ -16,7 +18,9 @@ const ICONS: Record<string, LucideIcon> = {
     Wind,
     Ear,
     Hand,
+    HeartPulse,
     Shirt,
+    Sparkles,
     Anchor,
     ShieldCheck,
 };
