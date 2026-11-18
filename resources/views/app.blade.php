@@ -20,6 +20,9 @@
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="{{ $seoPage['full_title'] }}">
         <meta name="twitter:description" content="{{ $seoPage['description'] }}">
+        @if (! empty($seoPage['graph']))
+            <script type="application/ld+json">{!! json_encode($seoPage['graph'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+        @endif
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />

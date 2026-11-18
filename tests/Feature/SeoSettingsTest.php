@@ -49,3 +49,20 @@ test('robots and sitemap are public', function () {
     $this->get('/robots.txt')->assertOk()->assertSee('Sitemap:', false);
     $this->get('/sitemap.xml')->assertOk()->assertSee('urlset', false);
 });
+
+test('storefront html includes platform json-ld for crawlers', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('application/ld+json', false)
+        ->assertSee('https://ginglesky.com', false)
+        ->assertSee('Ginglesky', false)
+        ->assertDontSee('Yetu ERP', false);
+});
+
+test('llms txt names the platform vendor', function () {
+    $this->get('/llms.txt')
+        ->assertOk()
+        ->assertSee('Ginglesky', false)
+        ->assertSee('https://ginglesky.com', false)
+        ->assertDontSee('Yetu ERP', false);
+});

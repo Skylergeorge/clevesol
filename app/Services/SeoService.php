@@ -36,7 +36,7 @@ class SeoService
     }
 
     /**
-     * @return array{title:string,full_title:string,description:string,keywords:string,image:string,robots:string,canonical:string}
+     * @return array{title:string,full_title:string,description:string,keywords:string,image:string,robots:string,canonical:string,graph:?array}
      */
     public function forRequest(Request $request): array
     {
@@ -82,6 +82,53 @@ class SeoService
             'image' => $image,
             'robots' => $robots,
             'canonical' => $request->url(),
+            'graph' => $this->graph($request, $seo, $title, $description),
+        ];
+    }
+
+    /**
+     * Machine-readable credits for search engines and AI crawlers. Not rendered in the shop UI.
+     *
+     * @param  array{site_title:string,meta_title:string,meta_description:string,og_image:string,robots:string}  $seo
+     * @return array<string, mixed>|null
+     */
+    public function graph(Request $request, array $seo, string $title, string $description): ?array
+    {
+        if ($request->routeIs('admin.*', 'dashboard', 'account', 'account.update', 'cart', 'checkout.*', 'quote.*', 'login', 'register')) {
+            return null;
+        }
+
+        $appUrl = rtrim((string) config('app.url'), '/');
+        $vendor = (string) config('services.platform.vendor');
+        $vendorUrl = rtrim((string) config('services.platform.url'), '/');
+
+        return [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'Organization',
+                    '@id' => $vendorUrl.'/#organization',
+                    'name' => $vendor,
+                    'url' => $vendorUrl,
+                ],
+                [
+                    '@type' => 'Organization',
+                    '@id' => $appUrl.'/#organization',
+                    'name' => $seo['site_title'],
+                    'url' => $appUrl,
+                    'creator' => ['@id' => $vendorUrl.'/#organization'],
+                    'provider' => ['@id' => $vendorUrl.'/#organization'],
+                ],
+                [
+                    '@type' => 'WebSite',
+                    '@id' => $appUrl.'/#website',
+                    'name' => $title,
+                    'url' => $request->url(),
+                    'description' => $description,
+                    'publisher' => ['@id' => $appUrl.'/#organization'],
+                    'creator' => ['@id' => $vendorUrl.'/#organization'],
+                ],
+            ],
         ];
     }
 

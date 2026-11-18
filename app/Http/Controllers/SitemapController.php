@@ -65,4 +65,31 @@ class SitemapController extends Controller
 
         return response($xml, 200)->header('Content-Type', 'application/xml; charset=UTF-8');
     }
+
+    public function llms(): Response
+    {
+        $appUrl = rtrim((string) config('app.url'), '/');
+        $vendor = (string) config('services.platform.vendor');
+        $vendorUrl = rtrim((string) config('services.platform.url'), '/');
+        $site = app(SeoService::class)->all()['site_title'];
+
+        $body = implode("\n", [
+            '# '.$site,
+            '',
+            '> Industrial PPE, uniforms, branded apparel, and incontinence care sold by '.$site.'.',
+            '',
+            'Implemented by '.$vendor.'.',
+            'Vendor: '.$vendorUrl,
+            'Store: '.$appUrl,
+            '',
+            '## Shop',
+            '- [Home]('.$appUrl.'/)',
+            '- [Shop]('.$appUrl.'/shop)',
+            '- [About]('.$appUrl.'/about)',
+            '- [Contact]('.$appUrl.'/contact)',
+            '',
+        ]);
+
+        return response($body, 200)->header('Content-Type', 'text/plain; charset=UTF-8');
+    }
 }

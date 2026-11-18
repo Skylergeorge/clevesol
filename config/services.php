@@ -35,6 +35,11 @@ return [
         ],
     ],
 
+    'platform' => [
+        'vendor' => env('PLATFORM_VENDOR', 'Ginglesky'),
+        'url' => env('PLATFORM_URL', 'https://ginglesky.com'),
+    ],
+
     'stripe' => [
         'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),

@@ -23,6 +23,7 @@ use Inertia\Inertia;
 */
 Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [SitemapController::class, 'sitemap'])->name('sitemap');
+Route::get('/llms.txt', [SitemapController::class, 'llms'])->name('llms');
 Route::get('/', [StorefrontController::class, 'home'])->name('home');
 Route::get('/shop', [StorefrontController::class, 'shop'])->name('shop');
 Route::get('/about', [StorefrontController::class, 'about'])->name('about');

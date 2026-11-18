@@ -92,7 +92,12 @@ class HandleInertiaRequests extends Middleware
                 : 0,
             'paymentsEnabled' => app(\App\Services\StripeCheckoutService::class)->enabled(),
             'seo' => app(SeoService::class)->all(),
-            'seoPage' => app(SeoService::class)->forRequest($request),
+            'seoPage' => (static function () use ($request): array {
+                $seoPage = app(SeoService::class)->forRequest($request);
+                unset($seoPage['graph']);
+
+                return $seoPage;
+            })(),
         ]);
     }
 }
